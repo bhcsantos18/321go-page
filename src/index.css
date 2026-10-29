@@ -1,0 +1,209 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/sora';
+@import '@fontsource-variable/inter';
+@import 'leaflet/dist/leaflet.css';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora Variable', 'Inter Variable', ui-sans-serif, sans-serif;
+
+  /* Laranja da marca (logo 3,2,1 GO!) */
+  --color-go-50: #fff4ee;
+  --color-go-100: #ffe4d5;
+  --color-go-200: #ffc5a8;
+  --color-go-300: #ff9e70;
+  --color-go-400: #ff7337;
+  --color-go-500: #ff4d00;
+  --color-go-600: #e54200;
+  --color-go-700: #be3500;
+  --color-go-800: #962b05;
+  --color-go-900: #7a260a;
+
+  /* Azul do globo */
+  --color-ocean-50: #f1f7fb;
+  --color-ocean-100: #ddebf4;
+  --color-ocean-200: #bcd7e9;
+  --color-ocean-300: #93bed9;
+  --color-ocean-400: #73a9cd;
+  --color-ocean-500: #5e9cc2;
+  --color-ocean-600: #437fa6;
+  --color-ocean-700: #376686;
+  --color-ocean-800: #30566f;
+  --color-ocean-900: #2c495d;
+
+  /* Ciano dos detalhes */
+  --color-aqua-200: #c9f7fe;
+  --color-aqua-300: #9cf0fc;
+  --color-aqua-400: #5ce3f7;
+  --color-aqua-500: #22cfe9;
+
+  /* Navy para fundos escuros */
+  --color-ink-50: #f6f7fa;
+  --color-ink-100: #eceff5;
+  --color-ink-200: #d5dbe6;
+  --color-ink-300: #a9b3c8;
+  --color-ink-400: #7a87a3;
+  --color-ink-500: #4f5c7a;
+  --color-ink-600: #2f3b59;
+  --color-ink-700: #1c2742;
+  --color-ink-800: #111a30;
+  --color-ink-900: #0a1020;
+  --color-ink-950: #060a14;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-spin-slow: spin 18s linear infinite;
+
+  @keyframes aurora {
+    0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50% { transform: translate3d(6%, -4%, 0) scale(1.12) rotate(8deg); }
+    100% { transform: translate3d(-5%, 5%, 0) scale(0.95) rotate(-6deg); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-50 font-sans text-ink-900 antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    @apply bg-go-500 text-white;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-go-500;
+  }
+  input[type='date'],
+  input[type='month'] {
+    color-scheme: light;
+  }
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='month']::-webkit-calendar-picker-indicator {
+    opacity: 0.55;
+    cursor: pointer;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility text-gradient {
+  background-image: linear-gradient(100deg, var(--color-go-400) 0%, var(--color-go-500) 30%, #ff8a3d 55%, var(--color-aqua-300) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility glass {
+  background: rgb(255 255 255 / 0.06);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+
+@utility grid-lines {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+@utility noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility field {
+  @apply h-12 w-full rounded-xl border border-ink-200 bg-white px-3.5 text-[15px] text-ink-900 transition outline-none placeholder:text-ink-400 hover:border-ink-300 focus:border-go-500 focus:ring-4 focus:ring-go-500/15;
+}
+
+/* ---------- Leaflet / mapa ---------- */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #e9eef3;
+}
+.leaflet-tile-pane {
+  filter: saturate(1.15) contrast(1.02);
+}
+.leaflet-control-attribution {
+  @apply rounded-tl-lg !bg-white/80 px-2 text-[10px] backdrop-blur;
+}
+.poi-pin {
+  --c: var(--color-go-500);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(-45deg);
+  background: var(--c);
+  color: white;
+  font: 700 12px/1 var(--font-display);
+  box-shadow: 0 6px 16px -4px rgb(0 0 0 / 0.45), 0 0 0 2.5px white;
+  transition: transform 0.25s var(--ease-out-expo), box-shadow 0.25s;
+}
+.poi-pin span {
+  transform: rotate(45deg);
+}
+.poi-pin.is-atracao { --c: var(--color-go-500); }
+.poi-pin.is-restaurante { --c: #0f9d76; }
+.poi-pin.is-compras { --c: #7c3aed; }
+.poi-pin.is-active {
+  transform: rotate(-45deg) scale(1.35);
+  box-shadow: 0 10px 24px -6px rgb(0 0 0 / 0.5), 0 0 0 3px white, 0 0 0 9px color-mix(in srgb, var(--c) 30%, transparent);
+  z-index: 1000;
+}
+.leaflet-marker-icon.poi-wrap {
+  background: none;
+  border: 0;
+}
+.leaflet-tooltip.poi-tooltip {
+  @apply rounded-xl border-0 bg-ink-900 px-3 py-2 text-white shadow-xl;
+  width: 240px;
+  white-space: normal;
+}
+.leaflet-tooltip.poi-tooltip::before {
+  border-top-color: var(--color-ink-900);
+}
