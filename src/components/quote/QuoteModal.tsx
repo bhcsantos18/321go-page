@@ -2,11 +2,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Calculator, Check, Copy, LoaderCircle, Mail, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { company } from '../../data/company'
+import { useEmpresa } from '../../lib/empresa'
 import { boardOptions, budgetOptions, cabinOptions, flexOptions, hotelOptions, serviceById, services } from '../../data/services'
 import type { ServiceId } from '../../data/types'
 import { newItem, useQuote, type QuoteDraft, type ServiceItem } from '../../lib/quote'
-import { mailtoLink, quoteToText, submitQuote, type StoredRequest } from '../../lib/submit'
+import { mailtoLink, quoteToText, registrarSemEnvio, submitQuote, type StoredRequest } from '../../lib/submit'
 import { cn, formatDays, isEmail, maskPhone } from '../../lib/utils'
 import { Button, Choice, Label, WhatsAppIcon } from '../ui'
 import { ServiceFields, TripTypeToggle } from './ServiceFields'
@@ -39,12 +39,14 @@ function itemErrors(errors: Record<string, boolean>, id: string) {
 }
 
 export function QuoteModal() {
+  const empresa = useEmpresa()
   const { isOpen, draft, update, closeQuote, reset } = useQuote()
   const [idx, setIdx] = useState(0)
   const [dir, setDir] = useState(1)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [result, setResult] = useState<StoredRequest | null>(null)
+  const [peloWhatsapp, setPeloWhatsapp] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
 
   const steps: StepKey[] = ['viagem', 'preferencias', 'servicos', ...(draft.extras.length ? (['detalhes'] as const) : []), 'contato']
@@ -131,9 +133,18 @@ export function QuoteModal() {
   async function next() {
     if (!validate()) return
     if (step === 'contato') {
+      if (empresa.unidade && !empresa.recebeOrcamento) {
+        const r = registrarSemEnvio(draft)
+        window.open(empresa.whatsappLink(quoteToText(draft, r.protocol, empresa.name)), '_blank', 'noopener')
+        setPeloWhatsapp(true)
+        setResult(r)
+        setStatus('done')
+        return
+      }
+      setPeloWhatsapp(false)
       setStatus('sending')
       try {
-        const r = await submitQuote(draft)
+        const r = await submitQuote(draft, empresa)
         setResult(r)
         setStatus('done')
       } catch {
@@ -218,7 +229,7 @@ export function QuoteModal() {
                   transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                 >
                   {status === 'done' && result ? (
-                    <DoneStep request={result} onClose={finish} />
+                    <DoneStep request={result} onClose={finish} peloWhatsapp={peloWhatsapp} />
                   ) : (
                     <>
                       <p className="mb-6 text-sm text-ink-500">{stepMeta[step].text}</p>
@@ -483,6 +494,7 @@ function Field({ label, error, children, htmlFor }: { label: string; error?: str
 }
 
 function ContactStep({ draft, update, errors }: { draft: QuoteDraft; update: (fn: (d: QuoteDraft) => QuoteDraft) => void; errors: Record<string, boolean> }) {
+  const empresa = useEmpresa()
   const c = draft.contact
   const set = (p: Partial<QuoteDraft['contact']>) => update((d) => ({ ...d, contact: { ...d.contact, ...p } }))
   const err = (k: string) => (errors[k] ? 'border-go-500 ring-4 ring-go-500/15' : '')
@@ -520,7 +532,7 @@ function ContactStep({ draft, update, errors }: { draft: QuoteDraft; update: (fn
           <Check className="pointer-events-none relative size-3.5 text-white opacity-0 peer-checked:opacity-100" strokeWidth={3} />
         </span>
         <span className="text-sm leading-relaxed text-ink-600">
-          Autorizo a {company.name} a usar meus dados para elaborar e enviar esta proposta, conforme a{' '}
+          Autorizo a {empresa.name} a usar meus dados para elaborar e enviar esta proposta, conforme a{' '}
           <Link to="/privacidade" target="_blank" className="font-semibold text-go-600 underline-offset-2 hover:underline">
             Política de Privacidade
           </Link>{' '}
@@ -535,9 +547,10 @@ function ContactStep({ draft, update, errors }: { draft: QuoteDraft; update: (fn
   )
 }
 
-function DoneStep({ request, onClose }: { request: StoredRequest; onClose: () => void }) {
+function DoneStep({ request, onClose, peloWhatsapp }: { request: StoredRequest; onClose: () => void; peloWhatsapp: boolean }) {
+  const empresa = useEmpresa()
   const [copied, setCopied] = useState(false)
-  const text = quoteToText(request.draft, request.protocol)
+  const text = quoteToText(request.draft, request.protocol, empresa.name)
   return (
     <div className="flex flex-col items-center py-4 text-center">
       <div className="relative">
@@ -552,7 +565,9 @@ function DoneStep({ request, onClose }: { request: StoredRequest; onClose: () =>
         3, 2, 1… <span className="text-gradient">GO!</span>
       </motion.h3>
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mt-3 max-w-md text-ink-500">
-        Recebemos sua solicitação, {request.draft.contact.name.split(' ')[0]}! Um consultor vai analisar tudo e falar com você pelo WhatsApp ou e-mail em breve.
+        {peloWhatsapp
+          ? `Abrimos o WhatsApp da equipe com o seu pedido, ${request.draft.contact.name.split(' ')[0]}. É só enviar a mensagem por lá.`
+          : `Recebemos sua solicitação, ${request.draft.contact.name.split(' ')[0]}! Um consultor vai analisar tudo e falar com você pelo WhatsApp ou e-mail em breve.`}
       </motion.p>
       <motion.button
         type="button"
@@ -568,12 +583,12 @@ function DoneStep({ request, onClose }: { request: StoredRequest; onClose: () =>
         Protocolo {request.protocol} {copied ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4 text-ink-400" />}
       </motion.button>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }} className="mt-8 w-full max-w-md space-y-3">
-        <p className="text-sm text-ink-400">Quer agilizar? Envie o resumo direto para a equipe:</p>
-        <a href={`https://wa.me/${company.whatsapp}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer" className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25d366] font-semibold text-white transition hover:brightness-95">
+        <p className="text-sm text-ink-400">{peloWhatsapp ? 'O WhatsApp não abriu? Use o botão abaixo:' : 'Quer agilizar? Envie o resumo direto para a equipe:'}</p>
+        <a href={empresa.whatsappLink(text)} target="_blank" rel="noreferrer" className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25d366] font-semibold text-white transition hover:brightness-95">
           <WhatsAppIcon className="size-5" /> Enviar pelo WhatsApp
         </a>
         <div className="grid grid-cols-2 gap-3">
-          <a href={mailtoLink(request.draft, request.protocol)} className="flex h-12 items-center justify-center gap-2 rounded-full border border-ink-200 font-semibold text-ink-800 transition hover:bg-ink-50">
+          <a href={mailtoLink(request.draft, request.protocol, empresa)} className="flex h-12 items-center justify-center gap-2 rounded-full border border-ink-200 font-semibold text-ink-800 transition hover:bg-ink-50">
             <Mail className="size-4" /> Por e-mail
           </a>
           <Button variant="dark" className="h-12" onClick={onClose}>

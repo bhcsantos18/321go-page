@@ -3,7 +3,7 @@ import { ArrowRight, CalendarDays, Check, Download, Eye, EyeOff, FileText, Loade
 import { useState, type FormEvent } from 'react'
 import { Aurora } from '../components/Hero'
 import { AnchorButton, Button, Label, WhatsAppIcon } from '../components/ui'
-import { company, whatsappLink } from '../data/company'
+import { useEmpresa } from '../lib/empresa'
 import { useAuth, type ClientDocument, type ClientTrip } from '../lib/auth'
 import { useQuote } from '../lib/quote'
 import { cn, daysBetween, formatDate, todayISO } from '../lib/utils'
@@ -28,6 +28,7 @@ export default function AreaCliente() {
 function Login() {
   const { login, demo } = useAuth()
   const { openQuote } = useQuote()
+  const { whatsappLink } = useEmpresa()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [show, setShow] = useState(false)
@@ -178,8 +179,8 @@ function Login() {
 const stages = ['Solicitado', 'Proposta', 'Confirmado', 'Documentos', 'Boa viagem!']
 const docIcons: Record<ClientDocument['type'], typeof FileText> = { voucher: Ticket, bilhete: Plane, seguro: ShieldCheck, roteiro: CalendarDays, contrato: FileText }
 
-function downloadDemo(doc: ClientDocument, trip: ClientTrip) {
-  const content = `${company.name}\n\n${doc.name}\nViagem: ${trip.title} — ${trip.destination}\nPeríodo: ${formatDate(trip.start)} a ${formatDate(trip.end)}\n\nDocumento de demonstração.`
+function downloadDemo(doc: ClientDocument, trip: ClientTrip, nomeDaEmpresa: string) {
+  const content = `${nomeDaEmpresa}\n\n${doc.name}\nViagem: ${trip.title} — ${trip.destination}\nPeríodo: ${formatDate(trip.start)} a ${formatDate(trip.end)}\n\nDocumento de demonstração.`
   const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }))
   const a = document.createElement('a')
   a.href = url
@@ -191,6 +192,8 @@ function downloadDemo(doc: ClientDocument, trip: ClientTrip) {
 function Dashboard() {
   const { user, logout } = useAuth()
   const { openQuote } = useQuote()
+  const empresa = useEmpresa()
+  const { whatsappLink } = empresa
   const [tripId, setTripId] = useState(user!.trips[0].id)
   const trip = user!.trips.find((t) => t.id === tripId)!
   const next = [...user!.trips].sort((a, b) => a.start.localeCompare(b.start))[0]
@@ -308,7 +311,7 @@ function Dashboard() {
                               {formatDate(d.date)} · {d.size}
                             </p>
                           </div>
-                          <button type="button" onClick={() => downloadDemo(d, trip)} aria-label={`Baixar ${d.name}`} className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-ink-200 text-ink-600 transition hover:border-go-500 hover:bg-go-500 hover:text-white">
+                          <button type="button" onClick={() => downloadDemo(d, trip, empresa.name)} aria-label={`Baixar ${d.name}`} className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-ink-200 text-ink-600 transition hover:border-go-500 hover:bg-go-500 hover:text-white">
                             <Download className="size-4" />
                           </button>
                         </motion.li>
@@ -329,8 +332,8 @@ function Dashboard() {
               <AnchorButton href={whatsappLink(`Olá! Sou ${user!.name}, cliente da 3,2,1 GO, e tenho uma dúvida sobre a viagem "${trip.title}".`)} className="relative mt-5 w-full bg-[#25d366] shadow-none hover:bg-[#1fb957]">
                 <WhatsAppIcon className="size-5" /> Falar com a agência
               </AnchorButton>
-              <a href={`mailto:${company.email}`} className="relative mt-3 flex items-center justify-center gap-2 text-sm text-ink-300 hover:text-white">
-                <Mail className="size-4" /> {company.email}
+              <a href={`mailto:${empresa.email}`} className="relative mt-3 flex items-center justify-center gap-2 text-sm text-ink-300 hover:text-white">
+                <Mail className="size-4" /> {empresa.email}
               </a>
             </div>
             <div className="rounded-3xl bg-white p-6 ring-1 ring-ink-100">

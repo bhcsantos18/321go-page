@@ -6,7 +6,7 @@ import { Carousel } from '../components/Carousel'
 import { DestinationCard } from '../components/Cards'
 import { PageHero } from '../components/Hero'
 import { AnchorButton, Button, Reveal, SectionTitle } from '../components/ui'
-import { whatsappLink } from '../data/company'
+import { useEmpresa } from '../lib/empresa'
 import { destinationCategories, destinations } from '../data/destinations'
 import { useQuote } from '../lib/quote'
 import { cn } from '../lib/utils'
@@ -14,6 +14,7 @@ import { cn } from '../lib/utils'
 export default function Destinos() {
   const [cat, setCat] = useState('Todos')
   const { openQuote } = useQuote()
+  const { whatsappLink } = useEmpresa()
   const list = useMemo(() => (cat === 'Todos' ? destinations : destinations.filter((d) => d.category === cat)), [cat])
 
   return (

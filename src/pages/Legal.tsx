@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import { PageHero } from '../components/Hero'
-import { company } from '../data/company'
+import { useEmpresa } from '../lib/empresa'
+import { linhasDoEndereco } from '../lib/empresaDados'
 
 // Textos-base. Recomenda-se revisão por assessoria jurídica antes da publicação.
-const address = `${company.address.street}, ${company.address.district}, ${company.address.city}, CEP ${company.address.zip}`
 
 function LegalPage({ kicker, title, updated, children }: { kicker: string; title: string; updated: string; children: ReactNode }) {
   return (
@@ -17,10 +17,12 @@ function LegalPage({ kicker, title, updated, children }: { kicker: string; title
 }
 
 export function Privacidade() {
+  const empresa = useEmpresa()
+  const sede = empresa.legal.address ? `, com sede em ${linhasDoEndereco(empresa.legal.address).filter(Boolean).join(', ')}` : ''
   return (
     <LegalPage kicker="LGPD" title="Política de Privacidade" updated="outubro de 2026">
       <p>
-        A <strong>{company.legalName}</strong> (CNPJ {company.cnpj}), com sede em {address}, respeita a sua privacidade e trata dados pessoais de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).
+        A <strong>{empresa.legal.name}</strong> (CNPJ {empresa.legal.cnpj}){sede}, respeita a sua privacidade e trata dados pessoais de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).
       </p>
       <h2>1. Quais dados coletamos</h2>
       <ul>
@@ -43,22 +45,23 @@ export function Privacidade() {
       <h2>5. Armazenamento e segurança</h2>
       <p>Adotamos medidas técnicas e administrativas para proteger seus dados e os mantemos apenas pelo tempo necessário às finalidades informadas ou exigido por lei.</p>
       <h2>6. Seus direitos</h2>
-      <p>Você pode solicitar confirmação, acesso, correção, anonimização, portabilidade, eliminação de dados e revogação do consentimento, entre outros direitos do art. 18 da LGPD, pelo e-mail {company.email}.</p>
+      <p>Você pode solicitar confirmação, acesso, correção, anonimização, portabilidade, eliminação de dados e revogação do consentimento, entre outros direitos do art. 18 da LGPD, pelo e-mail {empresa.email}.</p>
       <h2>7. Cookies</h2>
       <p>Este site utiliza armazenamento local do navegador apenas para funcionalidades essenciais, como manter sua sessão na Área do Cliente. Os mapas utilizam o OpenStreetMap.</p>
       <h2>8. Contato</h2>
       <p>
-        Dúvidas sobre esta política: {company.email} · {company.phone}.
+        Dúvidas sobre esta política: {empresa.email} · {empresa.phone}.
       </p>
     </LegalPage>
   )
 }
 
 export function Termos() {
+  const empresa = useEmpresa()
   return (
     <LegalPage kicker="Termos" title="Termos de Uso" updated="outubro de 2026">
       <p>
-        Ao utilizar este site, você concorda com os termos abaixo. O site é operado por <strong>{company.legalName}</strong> (CNPJ {company.cnpj}).
+        Ao utilizar este site, você concorda com os termos abaixo. O site é operado por <strong>{empresa.legal.name}</strong> (CNPJ {empresa.legal.cnpj}).
       </p>
       <h2>1. Solicitações de orçamento</h2>
       <p>Os formulários do site registram pedidos de orçamento sem compromisso. Valores, disponibilidade e condições só são válidos após proposta formal enviada por um consultor e confirmação da reserva.</p>

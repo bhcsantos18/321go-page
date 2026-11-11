@@ -2,22 +2,27 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, Menu, UserRound, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { company } from '../../data/company'
+import { useEmpresa } from '../../lib/empresa'
 import { useQuote } from '../../lib/quote'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui'
 
-export const navItems = [
-  { to: '/', label: 'Início' },
+const itensDaRede = [
   { to: '/destinos', label: 'Destinos' },
   { to: '/orlando', label: 'Orlando' },
   { to: '/orlando/mapas', label: 'Mapas' },
   { to: '/orlando/calculadora', label: 'Calculadora' },
 ]
 
+export function useNavItems() {
+  const { pacotes } = useEmpresa()
+  return [{ to: '/', label: 'Início' }, ...(pacotes.length ? [{ to: '/pacotes', label: 'Pacotes' }] : []), ...itensDaRede]
+}
+
 export function Logo({ className, compact }: { className?: string; compact?: boolean }) {
+  const empresa = useEmpresa()
   return (
-    <Link to="/" className={cn('group flex items-center gap-2.5', className)} aria-label={`${company.name} — página inicial`}>
+    <Link to="/" className={cn('group flex items-center gap-2.5', className)} aria-label={`${empresa.name} — página inicial`}>
       <motion.img
         src="/img/brand/logo-sm.png"
         alt=""
@@ -28,7 +33,7 @@ export function Logo({ className, compact }: { className?: string; compact?: boo
       {!compact && (
         <span className="hidden leading-none sm:block">
           <span className="block font-display text-lg font-bold tracking-tight text-white">3,2,1 GO!</span>
-          <span className="block text-[11px] font-medium tracking-[0.2em] text-ink-300 uppercase">Viagens</span>
+          <span className="block max-w-[14rem] truncate text-[11px] font-medium tracking-[0.2em] text-ink-300 uppercase">{empresa.unidade ? empresa.nomeCurto : 'Viagens'}</span>
         </span>
       )}
     </Link>
@@ -40,6 +45,8 @@ export function Header() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const { openQuote } = useQuote()
+  const empresa = useEmpresa()
+  const navItems = useNavItems()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -139,7 +146,7 @@ export function Header() {
                   Solicitar orçamento
                 </Button>
                 <p className="mt-6 text-center text-sm text-ink-400">
-                  {company.phone} · {company.email}
+                  {empresa.phone} · {empresa.email}
                 </p>
               </motion.div>
             </nav>

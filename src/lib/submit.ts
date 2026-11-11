@@ -1,5 +1,6 @@
 import { company } from '../data/company'
 import { serviceById } from '../data/services'
+import { enviarOrcamentoAoCarby } from './carby'
 import type { QuoteDraft, ServiceItem } from './quote'
 import { formatDate, formatDays } from './utils'
 
@@ -63,9 +64,11 @@ const detailLabels: Record<string, string> = {
   cabins: 'Cabines',
 }
 
-export function quoteToText(draft: QuoteDraft, protocol?: string) {
+export type DestinoDoPedido = { endereco: string | null; recebeOrcamento: boolean; name: string; email: string }
+
+export function quoteToText(draft: QuoteDraft, protocol?: string, nomeDaEmpresa: string = company.name) {
   const out: string[] = []
-  out.push(`*Solicitação de orçamento — ${company.name}*${protocol ? `\nProtocolo: ${protocol}` : ''}`)
+  out.push(`*Solicitação de orçamento — ${nomeDaEmpresa}*${protocol ? `\nProtocolo: ${protocol}` : ''}`)
   out.push('')
   const groups = [draft.main, ...draft.extras]
   for (const s of groups) {
@@ -128,10 +131,22 @@ export function deleteRequest(protocol: string) {
  * - Sempre registra no Painel do consultor (/painel) deste navegador.
  * - Na confirmação, o cliente também pode encaminhar o resumo pelo WhatsApp ou e-mail.
  */
-export async function submitQuote(draft: QuoteDraft): Promise<StoredRequest> {
+export async function submitQuote(draft: QuoteDraft, destino?: DestinoDoPedido): Promise<StoredRequest> {
   const request: StoredRequest = { protocol: makeProtocol(), createdAt: new Date().toISOString(), status: 'novo', draft }
   const endpoint = import.meta.env.VITE_QUOTE_ENDPOINT as string | undefined
-  if (endpoint) {
+  if (destino?.endereco && destino.recebeOrcamento) {
+    const { contact, ...viagem } = draft
+    const resposta = await enviarOrcamentoAoCarby(destino.endereco, {
+      nome: contact.name,
+      whatsapp: contact.whatsapp,
+      email: contact.email,
+      resumo: quoteToText(draft, request.protocol, destino.name),
+      protocolo: request.protocol,
+      pagina: window.location.pathname,
+      dados: { ...viagem, contato: { notas: contact.notes, consentimento: contact.consent } },
+    })
+    if (!resposta.ok) throw new Error(`Pedido recusado: ${resposta.motivo}`)
+  } else if (endpoint) {
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -145,7 +160,13 @@ export async function submitQuote(draft: QuoteDraft): Promise<StoredRequest> {
   return request
 }
 
-export function mailtoLink(draft: QuoteDraft, protocol: string) {
+export function registrarSemEnvio(draft: QuoteDraft): StoredRequest {
+  const request: StoredRequest = { protocol: makeProtocol(), createdAt: new Date().toISOString(), status: 'novo', draft }
+  saveRequests([request, ...listRequests()])
+  return request
+}
+
+export function mailtoLink(draft: QuoteDraft, protocol: string, destino: { name: string; email: string } = { name: company.name, email: company.email }) {
   const subject = `Orçamento ${protocol} — ${draft.contact.name}`
-  return `mailto:${company.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(quoteToText(draft, protocol).replace(/\*/g, ''))}`
+  return `mailto:${destino.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(quoteToText(draft, protocol, destino.name).replace(/\*/g, ''))}`
 }

@@ -6,7 +6,7 @@ import { DestinationCard } from '../components/Cards'
 import { PageHero } from '../components/Hero'
 import { AnchorButton, Button, LinkButton, Reveal, SectionTitle } from '../components/ui'
 import { WhatsAppIcon } from '../components/ui'
-import { whatsappLink } from '../data/company'
+import { useEmpresa } from '../lib/empresa'
 import { destinations, getDestination } from '../data/destinations'
 import { useQuote } from '../lib/quote'
 import NotFound from './NotFound'
@@ -15,6 +15,7 @@ export default function Destino() {
   const { slug } = useParams()
   const d = getDestination(slug)
   const { openQuote } = useQuote()
+  const { whatsappLink } = useEmpresa()
   if (!d) return <NotFound />
 
   const request = (notes?: string) => openQuote({ service: 'pacote', item: { destination: d.title }, source: `destino:${d.slug}`, notes })

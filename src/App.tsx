@@ -5,11 +5,14 @@ import { Footer, WhatsAppFab } from './components/layout/Footer'
 import { Header } from './components/layout/Header'
 import { QuoteModal } from './components/quote/QuoteModal'
 import { AuthProvider } from './lib/auth'
+import { EmpresaProvider } from './lib/empresa'
 import { QuoteProvider } from './lib/quote'
 import Home from './pages/Home'
 
 const Destinos = lazy(() => import('./pages/Destinos'))
 const Destino = lazy(() => import('./pages/Destino'))
+const Pacotes = lazy(() => import('./pages/Pacotes'))
+const Pacote = lazy(() => import('./pages/Pacote'))
 const Orlando = lazy(() => import('./pages/Orlando'))
 const Parque = lazy(() => import('./pages/Parque'))
 const Local = lazy(() => import('./pages/Local'))
@@ -47,6 +50,7 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
+      <EmpresaProvider>
       <AuthProvider>
         <QuoteProvider>
           <RouteProgress />
@@ -64,6 +68,8 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/destinos" element={<Destinos />} />
                   <Route path="/destinos/:slug" element={<Destino />} />
+                  <Route path="/pacotes" element={<Pacotes />} />
+                  <Route path="/pacotes/:id" element={<Pacote />} />
                   <Route path="/orlando" element={<Orlando />} />
                   <Route path="/orlando/parques/:park" element={<Parque />} />
                   <Route path="/orlando/parques/:park/local/:poi" element={<Local />} />
@@ -84,6 +90,7 @@ export default function App() {
           <QuoteModal />
         </QuoteProvider>
       </AuthProvider>
+      </EmpresaProvider>
     </MotionConfig>
   )
 }

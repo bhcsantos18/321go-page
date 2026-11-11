@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Carousel } from '../components/Carousel'
 import { DestinationCard } from '../components/Cards'
+import { PacotesDaUnidade } from '../components/Pacotes'
+import { SobreAUnidade } from '../components/Unidade'
 import { Aurora } from '../components/Hero'
 import { ParkBadge } from '../components/ParkBadge'
 import { QuoteBox } from '../components/quote/QuoteBox'
@@ -11,6 +13,7 @@ import { AnchorButton, Button, Kicker, LinkButton, Reveal, SectionTitle } from '
 import { company, tripCategories } from '../data/company'
 import { destinations } from '../data/destinations'
 import { parkBySlug } from '../data/parks'
+import { useEmpresa } from '../lib/empresa'
 import { useQuote } from '../lib/quote'
 import { cn } from '../lib/utils'
 
@@ -97,6 +100,7 @@ function HeroSlideshow() {
 
 function Hero() {
   const ref = useRef<HTMLElement>(null)
+  const { unidade } = useEmpresa()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
   const y = useTransform(scrollYProgress, [0, 1], [0, 120])
   return (
@@ -114,7 +118,7 @@ function Hero() {
           Transformamos sonhos em <RotatingWord />
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.55 }} className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-300 sm:text-xl">
-          Pacotes nacionais e internacionais, roteiros personalizados, Disney, cruzeiros e lua de mel — com consultoria de verdade do primeiro clique ao embarque.
+          {unidade?.frase_destaque || 'Pacotes nacionais e internacionais, roteiros personalizados, Disney, cruzeiros e lua de mel — com consultoria de verdade do primeiro clique ao embarque.'}
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.75, ease: [0.16, 1, 0.3, 1] }} className="mt-10 lg:mt-14">
           <QuoteBox />
@@ -389,6 +393,8 @@ export default function Home() {
     <>
       <Hero />
       <Marquee />
+      <PacotesDaUnidade />
+      <SobreAUnidade />
       <Services />
       <HowItWorks />
       <DestinationsPreview />

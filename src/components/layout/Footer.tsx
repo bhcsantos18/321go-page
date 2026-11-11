@@ -1,13 +1,19 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Mail, MapPin, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { company, tripCategories, whatsappLink } from '../../data/company'
+import { tripCategories } from '../../data/company'
+import { useEmpresa } from '../../lib/empresa'
+import { linhasDoEndereco } from '../../lib/empresaDados'
 import { useQuote } from '../../lib/quote'
 import { AnchorButton, Button, InstagramIcon, WhatsAppIcon } from '../ui'
-import { Logo, navItems } from './Header'
+import { Logo, useNavItems } from './Header'
 
 export function Footer() {
   const { openQuote } = useQuote()
+  const empresa = useEmpresa()
+  const navItems = useNavItems()
+  const endereco = empresa.address ? linhasDoEndereco(empresa.address) : null
+  const whatsappLink = empresa.whatsappLink
   return (
     <footer className="relative overflow-hidden bg-ink-950 text-ink-300">
       <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[60rem] -translate-x-1/2 rounded-full bg-go-500/20 blur-[120px]" />
@@ -41,9 +47,9 @@ export function Footer() {
         <div className="grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <Logo />
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-400">{company.slogan}</p>
+            <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-400">{empresa.slogan}</p>
             <div className="mt-6 flex gap-2">
-              <a href={company.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="glass grid size-11 place-items-center rounded-full text-white transition hover:bg-go-500">
+              <a href={empresa.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="glass grid size-11 place-items-center rounded-full text-white transition hover:bg-go-500">
                 <InstagramIcon className="size-5" />
               </a>
               <a href={whatsappLink()} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="glass grid size-11 place-items-center rounded-full text-white transition hover:bg-[#25d366]">
@@ -86,24 +92,26 @@ export function Footer() {
           <div className="lg:col-span-3">
             <h3 className="text-sm font-semibold text-white">Contato</h3>
             <ul className="mt-4 space-y-4 text-sm">
-              <li className="flex gap-3">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-go-400" />
-                <span>
-                  {company.address.street} — {company.address.district}
-                  <br />
-                  {company.address.city} · CEP {company.address.zip}
-                </span>
-              </li>
+              {endereco && (
+                <li className="flex gap-3">
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-go-400" />
+                  <span>
+                    {endereco[0]}
+                    <br />
+                    {endereco[1]}
+                  </span>
+                </li>
+              )}
               <li className="flex gap-3">
                 <Phone className="size-4 shrink-0 text-go-400" />
                 <a href={whatsappLink()} target="_blank" rel="noreferrer" className="hover:text-white">
-                  {company.phone}
+                  {empresa.phone}
                 </a>
               </li>
               <li className="flex gap-3">
                 <Mail className="size-4 shrink-0 text-go-400" />
-                <a href={`mailto:${company.email}`} className="break-all hover:text-white">
-                  {company.email}
+                <a href={`mailto:${empresa.email}`} className="break-all hover:text-white">
+                  {empresa.email}
                 </a>
               </li>
             </ul>
@@ -112,7 +120,7 @@ export function Footer() {
 
         <div className="flex flex-col gap-4 border-t border-white/10 py-8 text-xs text-ink-500 md:flex-row md:items-center md:justify-between">
           <p>
-            © {new Date().getFullYear()} {company.legalName} · CNPJ {company.cnpj}
+            © {new Date().getFullYear()} {empresa.legal.name} · CNPJ {empresa.legal.cnpj}
           </p>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link to="/privacidade" className="hover:text-white">
@@ -132,6 +140,7 @@ export function Footer() {
 }
 
 export function WhatsAppFab() {
+  const { whatsappLink } = useEmpresa()
   return (
     <motion.a
       href={whatsappLink()}
