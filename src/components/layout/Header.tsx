@@ -9,6 +9,7 @@ import { Button } from '../ui'
 
 const itensDaRede = [
   { to: '/destinos', label: 'Destinos' },
+  { to: '/cruzeiros', label: 'Cruzeiros' },
   { to: '/orlando', label: 'Orlando' },
   { to: '/orlando/mapas', label: 'Mapas' },
   { to: '/orlando/calculadora', label: 'Calculadora' },

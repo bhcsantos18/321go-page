@@ -149,7 +149,7 @@ function Marquee() {
 const bento = [
   { title: 'Pacotes e roteiros personalizados', text: 'Do jeito que você sonhou, com o ritmo que faz sentido para você.', image: 'planejamento', className: 'md:col-span-2 md:row-span-2', service: 'pacote' as const },
   { title: 'Disney e Orlando', text: 'Parques, ingressos e roteiros mágicos.', image: 'disney', to: '/orlando' },
-  { title: 'Cruzeiros', text: 'Marítimos e fluviais.', image: 'cruzeiros-2', service: 'cruzeiro' as const },
+  { title: 'Cruzeiros', text: 'Marítimos e fluviais.', image: 'cruzeiros-2', to: '/cruzeiros' },
   { title: 'Resorts all inclusive', text: 'Descanso sem preocupação.', image: 'resort', service: 'hospedagem' as const },
   { title: 'Lua de mel', text: 'Destinos para começar a vida a dois.', image: 'maldivas-2', service: 'pacote' as const, notes: 'Interesse: Lua de mel' },
   { title: 'Grupos exclusivos', text: 'Família, amigos e empresas.', image: 'familia', className: 'md:col-span-2', service: 'pacote' as const, notes: 'Interesse: Grupo exclusivo' },

@@ -258,6 +258,7 @@ export const destinations: Destination[] = [
     offers: [
       { title: 'Costa brasileira', nights: '5 noites', includes: ['Cabine externa', 'Pensão completa', 'Taxas portuárias'], tag: 'Temporada' },
     ],
+    related: { label: 'Explorar cruzeiros', to: '/cruzeiros' },
   },
   {
     slug: 'patagonia',

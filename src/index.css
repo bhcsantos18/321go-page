@@ -207,3 +207,86 @@
 .leaflet-tooltip.poi-tooltip::before {
   border-top-color: var(--color-ink-900);
 }
+
+@keyframes cz-deriva {
+  to { transform: translateX(var(--cz-dx)); }
+}
+@keyframes cz-balanco {
+  0%, 100% { transform: rotate(-0.5deg) translateY(0); }
+  50% { transform: rotate(0.45deg) translateY(3px); }
+}
+@keyframes cz-esteira {
+  to { stroke-dashoffset: -58; }
+}
+@keyframes cz-pisca {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 1; }
+}
+@keyframes cz-fumaca {
+  0% { opacity: 0.8; transform: translate(0, 0) scale(0.4); }
+  100% { opacity: 0; transform: translate(-80px, -70px) scale(2.6); }
+}
+@keyframes cz-radar {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.12); }
+}
+@keyframes cz-varredura {
+  from { transform: translateX(-20%); }
+  to { transform: translateX(120%); }
+}
+@keyframes cz-pulso {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+@keyframes cz-brilho {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.85; }
+}
+
+.cz-caixa {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.cz-deriva {
+  animation: cz-deriva linear infinite;
+}
+.cz-balanco {
+  transform-box: fill-box;
+  transform-origin: 50% 92%;
+  animation: cz-balanco 6.5s ease-in-out infinite;
+}
+.cz-esteira {
+  animation: cz-esteira 1.4s linear infinite;
+}
+.cz-pisca {
+  animation: cz-pisca 3.2s ease-in-out infinite;
+}
+.cz-fumaca {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cz-fumaca 2.6s ease-out forwards;
+}
+.cz-radar {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cz-radar 2.4s ease-in-out infinite;
+}
+.cz-varredura {
+  animation: cz-varredura 5.5s linear infinite;
+}
+.cz-pulso {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cz-pulso 2.2s ease-out infinite;
+}
+.cz-brilho {
+  animation: cz-brilho 2.8s ease-in-out infinite;
+}
+.cz-janela {
+  fill: var(--cz-janela);
+  transition: fill 0.9s ease;
+}
+.cz-escotilha {
+  fill: var(--cz-escotilha);
+  transition: fill 0.9s ease;
+}

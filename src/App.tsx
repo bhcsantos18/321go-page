@@ -14,6 +14,7 @@ const Destino = lazy(() => import('./pages/Destino'))
 const Pacotes = lazy(() => import('./pages/Pacotes'))
 const Pacote = lazy(() => import('./pages/Pacote'))
 const Orlando = lazy(() => import('./pages/Orlando'))
+const Cruzeiros = lazy(() => import('./pages/Cruzeiros'))
 const Parque = lazy(() => import('./pages/Parque'))
 const Local = lazy(() => import('./pages/Local'))
 const Mapa = lazy(() => import('./pages/Mapa'))
@@ -70,6 +71,7 @@ export default function App() {
                   <Route path="/destinos/:slug" element={<Destino />} />
                   <Route path="/pacotes" element={<Pacotes />} />
                   <Route path="/pacotes/:id" element={<Pacote />} />
+                  <Route path="/cruzeiros" element={<Cruzeiros />} />
                   <Route path="/orlando" element={<Orlando />} />
                   <Route path="/orlando/parques/:park" element={<Parque />} />
                   <Route path="/orlando/parques/:park/local/:poi" element={<Local />} />
